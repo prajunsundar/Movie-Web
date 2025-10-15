@@ -1,0 +1,62 @@
+{% extends 'admin base.html' %}
+
+{% block content %}
+
+<section>
+    <div class="container user-row">
+        <div class="row ">
+            <div class="table-responsive">
+                <h6 class="table-title">SHOW DETAILS</h6>
+                <div class="panel panel-primary">
+                    <table class="table table-hover table-striped table-bordered" id="dev-table">
+                        <thead class="table-h">
+                        <tr>
+                            <th>No</th>
+                            <th>Date</th>
+                            <th>Show Time</th>
+                            <th>Theater</th>
+                            <th>Language</th>
+                            <th>Ticket Price</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        {% for show in show %}
+                        <tr>
+                            <td> {{ forloop.counter}}</td>
+                            <td> {{show.date}}</td>
+                            <td>{{ show.start_time }}--{{ show.end_time }}</td>
+                            <td>{{ show.screen.theater.name }}--{{ show.screen.screen }}</td>
+                            <td>{{ show.movie.language }}</td>
+                            <td>Rs.{{show.ticket}}</td>
+                            <td>
+                                <a class="btn btn-success btn-xs" href="{% url 'bookapp:show-update' show.id %}"><i class="fa-solid fa-pen-to-square"></i></a>
+                                <a class="btn btn-danger btn-xs" href="{% url 'bookapp:show-delete' show.id %}"><i class="fa-solid fa-trash"></i></a>
+                            </td>
+
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% if messages %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        {% for message in messages %}
+            Swal.fire({
+                icon: "{% if message.tags %}{{ message.tags }}{% else %}info{% endif %}",
+                title: "{{ message|escapejs }}",
+                showConfirmButton: false,
+                timer: 3000
+            });
+        {% endfor %}
+    });
+</script>
+{% endif %}
+
+{% endblock  %}
+
+

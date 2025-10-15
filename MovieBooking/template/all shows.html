@@ -1,0 +1,42 @@
+{% extends 'admin base.html' %}
+
+
+{% block content %}
+
+<section>
+    <div class="container">
+        <h2 class="text-center p-2">ALL SHOWS</h2>
+        <div class="row">
+            {% for movie in movie %}
+            <div class="col-sm-12 col-md-6 col-lg-4 g-4">
+                <div class="card p-3 shadow" style="width: 18rem;height:100%;">
+                    <img src="{{movie.poster.url}}" class="card-img-top" alt="..." style="width:100%;height:400px;object-fit:fill;">
+                    <div class="card-body">
+                        <h5 class="card-title">{{movie.title|upper}}</h5>
+                        <a href="{% url 'bookapp:shows-details' movie.id %}" class="btn btn-info">Show Details</a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <h2 class="text-center p-2">NO SHOWS</h2>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+{% if messages %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        {% for message in messages %}
+            Swal.fire({
+                icon: "{% if message.tags %}{{ message.tags }}{% else %}info{% endif %}",
+                title: "{{ message|escapejs }}",
+                showConfirmButton: false,
+                timer: 3000
+            });
+        {% endfor %}
+    });
+</script>
+{% endif %}
+
+{% endblock %}

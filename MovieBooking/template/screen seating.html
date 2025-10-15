@@ -1,0 +1,286 @@
+{% extends 'admin base.html' %}
+
+
+{% block content %}
+
+    <style>
+        .screen-area {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .screen-display {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            display: inline-block;
+        }
+
+        .seating-chart {
+            display: grid;
+            grid-template-columns: auto repeat({{ screen.columns }}, 50px); /* Adjust column width as needed */
+            gap: 5px;
+            justify-content: center;
+            margin: 20px;
+        }
+        .row-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        /* --- Seat Styling --- */
+        .seat-wrapper {
+            width: 40px; /* Exact seat width */
+            height: 40px; /* Exact seat height */
+            border: 1px solid #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            border-radius: 5px;
+            cursor: pointer; /* Indicate it's clickable */
+            transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+            position: relative; /* Needed for positioning the hidden checkbox */
+        }
+
+        .seat-wrapper input[type="checkbox"] {
+            /* Visually hide the checkbox, but keep it functional */
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            margin: 0;
+            padding: 0;
+            cursor: inherit; /* Inherit cursor from parent (.seat-wrapper) */
+            z-index: 1; /* Ensure it's clickable */
+        }
+
+        .seat-wrapper .seat-label {
+            /* This is the visible seat number */
+            position: relative; /* Ensure it's above the checkbox, but doesn't block clicks */
+            z-index: 0;
+            pointer-events: none; /* Crucial: Allows clicks on the label to pass through to the checkbox */
+        }
+
+        /* --- Color Definitions based on Status --- */
+        .seat-wrapper.Available { background-color: #e0ffe0; } /* Light green */
+        .seat-wrapper.Booked { background-color: #ffcccc; cursor: not-allowed; } /* Light red */
+        .seat-wrapper.Premium { background-color: blue; color: white; }
+        .seat-wrapper.Blocked { background-color: red; color: white; cursor: not-allowed; }
+
+        /* --- Style for Selected Seats --- */
+        .seat-wrapper input[type="checkbox"]:checked + .seat-label {
+            /* This selects the label element right after a checked checkbox */
+            /* You can apply styles to the label itself (e.g., text color, underline) */
+        }
+        .seat-wrapper input[type="checkbox"]:checked {
+            /* This targets the checkbox directly, allowing us to style its parent */
+            /* Using this technique, we can style the .seat-wrapper based on its child's checked state */
+        }
+
+        /* The most common and effective way to highlight the entire seat: */
+        .seat-wrapper input[type="checkbox"]:checked ~ .seat-label { /* Use general sibling selector (~) to affect the label */
+             /* Add a distinct styling to show it's selected */
+            border: 2px solid green; /* Example: Green border */
+            box-shadow: 0 0 5px rgba(0, 128, 0, 0.5); /* Example: Green glow */
+        }
+        /* Or, you can toggle a 'selected' class with JavaScript on the .seat-wrapper */
+        .seat-wrapper.selected {
+            border: 2px solid green;
+            box-shadow: 0 0 5px rgba(0, 128, 0, 0.5);
+        }
+
+
+        .controls {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        /* --- Seat Status Chart/Legend --- */
+        .status-chart {
+            margin-top: 30px;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            display: inline-block;
+            text-align: left;
+            margin-left: auto;
+            margin-right: auto;
+            display: block; /* To center it */
+            width: fit-content; /* Make it fit content */
+        }
+        .status-chart h2 {
+            margin-top: 0;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+        .status-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .status-color-box {
+            width: 20px;
+            height: 20px;
+            border: 1px solid #ccc;
+            margin-right: 10px;
+            border-radius: 3px;
+        }
+        /* This styles the visible seat when it's selected */
+.seat-wrapper.selected {
+    border: 2px solid green; /* Example: A green border to show selection */
+    /* You can add other styles like a subtle background change or box-shadow */
+    /* background-color: #d6f5d6; */ /* Slightly different background for selected available seats */
+    box-shadow: 0 0 5px rgba(0, 128, 0, 0.5); /* A subtle green glow */
+}
+
+/* Ensure disabled seats cannot be visually selected */
+.seat-wrapper.Booked.selected,
+.seat-wrapper.Blocked.selected {
+    border: 1px solid #ccc; /* Revert border to default */
+    box-shadow: none; /* Remove glow */
+    /* You might want to keep the "cursor: not-allowed;" on the base .seat-wrapper.Booked/Blocked */
+}
+
+        /* Legend Colors - Match these to your seat-wrapper colors */
+        .status-color-box.Available { background-color: #e0ffe0; }
+        .status-color-box.Booked { background-color: #ffcccc; }
+        .status-color-box.Premium { background-color: blue; }
+        .status-color-box.Blocked { background-color: red; }
+
+        #status-selector {
+        width:200px;
+        height:30px;
+        padding:4px;
+        border-radius:4px;
+        shadow:3px;
+        }
+        #update-status-button{
+        width:200px;
+        height:30px;
+        padding:4px;
+        border-radius:4px;
+        shadow:3px;
+        }
+    </style>
+</head>
+<body>
+
+
+    <div class="screen-area">
+        <h1 class="text-center">{{ screen.theater.name }} - {{ screen.screen }}</h1>
+        <div class="screen-display">Screen</div>
+    </div>
+
+
+
+    <form method="post" action="{% url 'bookapp:update-seats' screen.id %}">
+        {% csrf_token %}
+        <div class="seating-chart">
+            {% for row_seats in seat_layout_grid %}
+                <div class="row-label">{{ row_seats.0.row }}</div>
+                {% for seat in row_seats %}
+                    <div class="seat-wrapper {{ seat.status }}"
+                         data-seat-id="{{ seat.id }}"
+                         data-row="{{ seat.row }}"
+                         data-number="{{ seat.number }}"
+                         data-status="{{ seat.status }}">
+                        <input type="checkbox"
+                               name="selected_seats"
+                               value="{{ seat.id }}"
+                               id="seat-{{ seat.id }}"
+                               >
+                        <label for="seat-{{ seat.id }}" class="seat-label">{{ seat.seat_number }}</label>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+
+        </div>
+
+        <div class="screen-area">
+            <div class="controls">
+            <select id="status-selector" name="status">
+                <option value="">Select Status</option>
+               {% for value,label in status %}
+                <option value="{{value}}">{{label}}</option>
+                {% endfor %}
+
+            </select>
+            <button id="update-status-button" type="submit">Update</button>
+        </div>
+        </div>
+    </form>
+    <div class="status-chart">
+        <h2>Seat Status</h2>
+        <div class="status-item">
+            <div class="status-color-box Available"></div> <span>Available</span>
+        </div>
+        <div class="status-item">
+            <div class="status-color-box Booked"></div> <span>Booked</span>
+        </div>
+        <div class="status-item">
+            <div class="status-color-box Premium"></div> <span>Premium</span>
+        </div>
+        <div class="status-item">
+            <div class="status-color-box Blocked"></div> <span>Blocked</span>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% if messages %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        {% for message in messages %}
+            Swal.fire({
+                icon: "{% if message.tags %}{{ message.tags }}{% else %}info{% endif %}",
+                title: "{{ message|escapejs }}",
+                showConfirmButton: false,
+                timer: 3000
+            });
+        {% endfor %}
+    });
+</script>
+{% endif %}
+
+ <script>
+
+document.addEventListener('DOMContentLoaded', function() {
+    const seatWrappers = document.querySelectorAll('.seat-wrapper');
+
+    seatWrappers.forEach(wrapper => {
+        const checkbox = wrapper.querySelector('input[type="checkbox"]');
+
+        // --- Initial State (Important for page load/reloads) ---
+        // If the checkbox is already checked (e.g., if the form was re-submitted
+        // with pre-selected seats), ensure the wrapper reflects that visually.
+        if (checkbox.checked) {
+            wrapper.classList.add('selected');
+        }
+
+        // --- Click Event Listener ---
+        // Attach the click listener to the entire 'seat-wrapper' div.
+        // This makes the entire seat block clickable.
+        wrapper.addEventListener('click', function(event) {
+            // Prevent toggling if the seat is disabled (booked/blocked)
+            if (checkbox.disabled) {
+                event.preventDefault(); // Stop the click from doing anything
+                return; // Exit the function
+            }
+
+            // Toggle the checkbox's checked state
+            checkbox.checked = !checkbox.checked;
+
+            // Update the visual 'selected' class on the 'seat-wrapper'
+            wrapper.classList.toggle('selected', checkbox.checked);
+        });
+    });
+});
+
+

@@ -1,0 +1,100 @@
+{% extends "admin base.html" %}
+{% load static %}
+{% load custom_filters %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Admin Dashboard</h1>
+
+    <!-- Stat Cards -->
+    <div class="row mb-4">
+        <div class="col-md-6 col-lg-3">
+            <div class="card shadow-sm border-0 p-3">
+                <h5>Total Bookings</h5>
+                <h2>{{ total_bookings }}</h2>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="card shadow-sm border-0 p-3">
+                <h5>Total Revenue</h5>
+                <h2>₹{{ revenue }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Movies Chart -->
+    <div class="card shadow-sm border-0 p-3 mb-4">
+        <h5>Top Movies / Shows</h5>
+        <canvas id="topMoviesChart"></canvas>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="card shadow-sm border-0 p-3">
+        <h5>Recent User Activity</h5>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Show</th>
+                    <th>Booking Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in recent_activity %}
+                <tr>
+                    <td>{{ booking.user.username }}</td>
+                    <td>{{ booking.showtime.movie.title }}</td>
+                    <td>{{ booking.created_at|date:"d M Y H:i" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+{% if messages %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        {% for message in messages %}
+            Swal.fire({
+                icon: "{% if message.tags %}{{ message.tags }}{% else %}info{% endif %}",
+                title: "{{ message|escapejs }}",
+                showConfirmButton: false,
+                timer: 3000
+            });
+        {% endfor %}
+    });
+</script>
+{% endif %}
+
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const labels = {{ top_movies|pluck:"showtime__movie__title"|safe }};
+    const counts = {{ top_movies|pluck:"count"|safe }};
+
+    const ctx = document.getElementById('topMoviesChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Bookings',
+                data: counts,
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+</script>
+{% endblock %}

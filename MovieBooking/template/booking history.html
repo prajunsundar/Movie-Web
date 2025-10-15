@@ -1,0 +1,87 @@
+{% extends "user base.html" %}
+{% block content %}
+<section>
+    <div class="container user-row">
+        <div class="row ">
+            <div class="table-responsive">
+                <h6 class="table-title">YOUR BOOKING HISTORY</h6>
+                <div class="panel panel-primary">
+
+                    <table class="table table-hover table-striped table-bordered" id="dev-table">
+                        <thead class="table-h">
+                        <tr>
+                            <th>No</th>
+                            <th>Movie</th>
+                            <th>Date</th>
+                            <th>Show Time</th>
+                          <th>Theater</th>
+                            <th>Booking Status</th>
+                            <th>Action</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for b in booking %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ b.showtime.movie.title }}</td>
+                            <td>{{ b.showtime.date }}</td>
+                            <td>{{ b.showtime.start_time }}--{{ b.showtime.end_time }}</td>
+                            <td>{{ b.showtime.screen.theater.name }}--{{ b.showtime.screen.screen }}</td>
+                            <td>{{ b.status }}</td>
+                            <td>
+                                {% if b.status == "Confirmed" %}
+                                <a href="{% url 'userapp:cancel-booking' b.id %}" class="btn btn-danger btn-sm">Cancel</a>
+                                {% else %}
+                                <button class="btn btn-danger btn-sm" disabled>Cancel</button>
+                                {% endif %}
+                            </td>
+                            {% empty %}
+                            <td class="text-center" colspan="7">No Booking</td>
+                        </tr>
+                        {% endfor %}
+
+                    </table>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+{% if messages %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    {% for message in messages %}
+        var msgText = "{{ message|escapejs }}";
+
+        // If message contains a file path to PDF, show download popup
+        if (msgText.includes("/media/") && msgText.endsWith(".pdf")) {
+            Swal.fire({
+                title: 'Booking Confirmed!',
+                html: `<a href="${msgText}" download class="swal2-confirm swal2-styled">
+                          Download Ticket
+                       </a>`,
+                icon: 'success',
+                showConfirmButton: false,
+                allowOutsideClick: false,
+                allowEscapeKey: false
+            });
+            return; // Stop here so other messages don't also show
+        }
+
+        // Otherwise, show normal popup
+        Swal.fire({
+            icon: '{% if message.tags %}{{ message.tags }}{% else %}info{% endif %}',
+            title: msgText,
+            showConfirmButton: false,
+            timer: 3000
+        });
+    {% endfor %}
+});
+</script>
+{% endif %}
+
+
+{% endblock %}

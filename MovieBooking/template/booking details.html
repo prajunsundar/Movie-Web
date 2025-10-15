@@ -1,0 +1,46 @@
+{% extends 'admin base.html' %}
+
+
+{% block content %}
+
+<section>
+    <div class="container">
+        <div class="row p-3" >
+            <div class="col-sm-12 col-md-12 col-lg-6">
+                <img src="{{booking.showtime.movie.poster.url}}" class="card-img-top" alt="..." style="width:100%;height:500px;object-fit:fill;">
+            </div>
+            <div class="col-sm-12 col-md-12 col-lg-6">
+                <h4 class="">{{booking.showtime.movie.title|upper}}</h4>
+                <h6 class="">Theater:{{booking.showtime.screen.theater.name}}</h6>
+                <h6 class="">Screen:{{booking.showtime.screen.screen}}</h6>
+                <h6 class="">Date:{{booking.showtime.date}} Time:{{booking.showtime.start_time}}--{{booking.showtime.end_time}}</h6>
+                 <h6 class="">Seats:{{booking.seats.all|join:","}}</h6>
+                <h6 class="">Total Amount:Rs.{{booking.total_amount}}</h6>
+                <h6 class="">Booking Status:{{booking.status}}</h6>
+                <form method="post" action="{% url 'bookapp:cancel-booking' booking.id %}">
+                    {% csrf_token %}
+                    <button class="btn btn-warning" type="submit">Cancel</button>
+                </form>
+
+            </div>
+
+        </div>
+    </div>
+</section>
+
+{% if messages %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        {% for message in messages %}
+            Swal.fire({
+                icon: "{% if message.tags %}{{ message.tags }}{% else %}info{% endif %}",
+                title: "{{ message|escapejs }}",
+                showConfirmButton: false,
+                timer: 3000
+            });
+        {% endfor %}
+    });
+</script>
+{% endif %}
+
+{% endblock %}

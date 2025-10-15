@@ -1,0 +1,52 @@
+{% extends 'admin base.html' %}
+
+
+{% block content %}
+
+
+<section>
+    <div class="container user-row">
+        <div class="row ">
+            <div class="table-responsive">
+                <h6 class="table-title">SHOW DETAILS</h6>
+                <div class="panel panel-primary">
+
+                    <table class="table table-hover table-striped table-bordered" id="dev-table">
+                        <thead class="table-h">
+                        <tr>
+                            <th>No</th>
+                            <th>Theater</th>
+                            <th>Screen</th>
+                            <th>Movie</th>
+                            <th>Seat Layout</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for s in show %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ s.screen.theater.name }}</td>
+                            <td>{{ s.screen.screen }}</td>
+                            <td>{{ s.movie.title }}</td>
+                            <td>
+                                <a href="{% url 'bookapp:show-seats' s.screen.id %}" class="btn btn-secondary"><i class="fa-solid fa-circle-info"></i></a>
+                            <td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                    {% for msg in messages %}
+            <div class="message text-center">
+                <h4 class="message">{{msg}}</h4>
+            </div>
+
+            {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+
+{% endblock %}

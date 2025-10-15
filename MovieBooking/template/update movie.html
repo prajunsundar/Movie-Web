@@ -1,0 +1,94 @@
+{% extends 'admin base.html' %}
+
+{% block content %}
+<section>
+  <div class="container">
+    <div class="row d-flex justify-content-center align-items-center">
+        <div class="card my-card" style="border-radius: 25px;">
+          <div class="card-body p-md-5">
+            <div class="row justify-content-center">
+              <div class="col-md-10 col-lg-6 col-xl-5 order-2 order-lg-1">
+
+                <p class="text-center h1 fw-bold mb-5 mx-1 mx-md-4 mt-4">Update Movie</p>
+
+                <form method="post" class="mx-1 mx-md-4 " enctype="multipart/form-data">
+
+                  {% csrf_token %}
+                    <div class="row">
+                        <div class="col-6" style="margin-right:10px;padding:5px;">
+                            <div class="column">
+                              <label for="the-name">Title</label>
+                              <input type="text" name="title" id="the-name" value="{{movie.title}}" required>
+
+                              <label for="the-reason">Genre</label>
+                              <select name="genre" id="the-reason" required>
+                                <option value="">Choose one</option>
+
+                                <option  value="{{movie.genre}}">{{movie.genre}}</option>
+
+                              </select>
+
+                                <label for="the-reason">Language</label>
+                              <select name="language" id="the-reason" required>
+                                <option value="">Choose one</option>
+
+                                  <option  value="{{movie.language}}">{{movie.language}}</option>
+
+
+                              </select>
+
+                            </div>
+                            <div class="column">
+                                <label for="the-message">Description</label>
+                                <textarea name="description" id="the-message" required>{{movie.description}}"</textarea>
+                                <label>
+                            </div>
+                        </div>
+
+
+                        <div class="col-6" style="margin-left:10px;padding:5px;">
+                            <div class="column">
+                                <label for="the-name">Poster</label>
+                                <input type="file" name="poster" id="the-name"required>
+
+                                <label for="the-email">Hour</label>
+                                <input type="number" name="hour" id="the-email" min="0" step="1"  required>
+
+                                <label for="the-email">Minutes</label>
+                                <input type="number" name="minute" id="the-email" min="0" max="59" step="1" required>
+
+                                <label for="the-phone">Release Date</label>
+                                <input type="date" name="release_date" id="the-phone"  value="{{movie.title}}" required>
+                            </div>
+                        </div>
+
+
+                  <div class="d-flex justify-content-center mx-4 mb-3 mb-lg-4">
+                    <button  type="submit" data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-lg">Update</button>
+                  </div>
+
+                </form>
+                <div class="text-center">
+                  {% for msg in messages %}
+                  <h4>{{msg}}</h4>
+                  {% endfor %}
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+
+
+
+
+
+{% endblock %}

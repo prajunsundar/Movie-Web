@@ -1,0 +1,68 @@
+{% extends 'user base.html' %}
+
+
+{% block content %}
+
+<section>
+    <div class="container">
+        <div class="row p-3" >
+            <div class="col-sm-12 col-md-12 col-lg-6">
+                <img src="{{movie.poster.url}}" class="card-img-top" alt="..." style="width:100%;height:500px;object-fit:fill;">
+            </div>
+            <div class="col-sm-12 col-md-12 col-lg-6">
+                <h4 class="">{{movie.title|upper}}</h4>
+                <h6 class="">Genre:{{movie.genre}}</h6>
+                 <h6 class="">Language:{{movie.language}}</h6>
+                <h6 class="">Description:{{movie.description}}</h6>
+                <h6 class="">Realesed:{{movie.release_date}}</h6>
+                {% if show %}
+                <section>
+    <div class="container user-row p-3">
+        <div class="row ">
+            <div class="table-responsive">
+                <h6 class="table-title">SHOW DETAILS</h6>
+                <div class="panel panel-primary">
+
+                    <table class="table table-hover table-striped table-bordered" id="dev-table">
+                        <thead class="table-h">
+                        <tr>
+                            <th>No</th>
+                            <th>Date</th>
+                            <th>Show Time</th>
+                            <th>Theater</th>
+                            <th>Ticket Price</th>
+                            <th>Action</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for show in shows %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ show.date}}</td>
+                            <td>{{ show.start_time }}--{{ show.end_time }}</td>
+                            <td>{{ show.screen.theater.name }}--{{ show.screen.screen }}</td>
+                            <td>Rs.{{show.ticket}}</td>
+                            <td>
+                                 <a href="{% url 'userapp:seat-layout' show.screen_id %}" class="btn btn-secondary">Book Show</a>
+                            <td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+              {% else %}
+                 <button class="btn btn-warring btn-xs" disabled>Release isn't yet</button>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+
+{% endblock %}

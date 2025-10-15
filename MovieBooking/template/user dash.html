@@ -1,0 +1,86 @@
+{% extends 'user base.html' %}
+
+
+{% block content %}
+
+
+
+
+
+
+
+<section>
+    <div class="container">
+        <div class="row">
+
+<form method="get" class="form p-3">
+    <label>Language Filter:</label>
+              <select typeof="text" name="language">
+                  <option value="">All</option>
+                  {% for value,label in lan %}
+                  <option value="{{value}}">{{label}}</option>
+                  {% endfor %}
+              </select>
+    <label>Date Filter:</label>
+              <select typeof="date" name="release_date">
+                  <option value="">All</option>
+                  {% for m in movie %}
+                  <option value="{{m.release_date|date:"Y-m-d"}}">{{m.release_date|date:"Y-m-d"}}</option>
+                  {% endfor %}
+              </select>
+    <label>Genre Filter:</label>
+              <select typeof="text" name="genre">
+                  <option value="">All</option>
+                  {% for value,label in genre %}
+                  <option value="{{value}}">{{label}}</option>
+                  {% endfor %}
+              </select>
+    <button type="submit" class="btn btn-success">Filter</button>
+
+
+</form>
+        </div>
+    </div>
+</section>
+
+<section>
+    <div class="container">
+        <div class="row">
+            {% for m in movie %}
+            <div class="col-sm-12 col-md-6 col-lg-4 g-4">
+                <div class="card p-3 shadow" style="width: 18rem;height:100%;">
+                    <img src="{{m.poster.url}}" class="card-img-top" alt="..." style="width:100%;height:400px;object-fit:fill;">
+                    <div class="card-body">
+                        <h5 class="card-title">{{m.title|upper}}</h5>
+                        <p class="card-text">Realese:{{m.release_date}}</p>
+                        <a href="{% url 'userapp:movie-details-view' m.id %}" class="btn btn-info">Details</a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <h3 class="text-center p-10">Zero Results</h3>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+{% if messages %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        {% for message in messages %}
+            Swal.fire({
+                icon: "{% if message.tags %}{{ message.tags }}{% else %}info{% endif %}",
+                title: "{{ message|escapejs }}",
+                showConfirmButton: false,
+                timer: 3000
+            });
+        {% endfor %}
+    });
+</script>
+{% endif %}
+
+
+{% endblock %}
+
